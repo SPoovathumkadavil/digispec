@@ -5,9 +5,9 @@
 #ifndef IS_TESTING
 #define IS_TESTING false
 #endif
-
-exported_class::exported_class()
-    : _name {"digispec"},
-      _test {IS_TESTING}
-{}
-
+namespace digispec {
+  digispec::digispec()
+      : m_name {"digispec"},
+        m_test {IS_TESTING}
+  {}
+} // namespace digispec

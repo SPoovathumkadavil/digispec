@@ -42,7 +42,7 @@ dev:
 .PHONY: test
 test:
 	echo "running test"
-	$(BUILD_DEV_DIR)/test/$(LIB)_test
+	cd $(BUILD_DEV_DIR)/test && ./$(LIB)_test
 
 .PHONY: clean
 clean:

@@ -20,7 +20,7 @@ TYPE i_vcc base::power::VCC
 TYPE i_gnd base::power::GND
 
 -- Requirements
-REQIRE i_vcc i_gnd
+REQUIRE i_vcc i_gnd
 
 begin set o_c0
 compare i_a0 i_b0
@@ -44,4 +44,4 @@ end o_c3
 
 end SN74LS08
 
-end chipsw
+end chips

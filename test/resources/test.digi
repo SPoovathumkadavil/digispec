@@ -11,6 +11,10 @@ ALIAS base::power::VCC vcc1
 ALIAS base::power::GND gnd1
 ALIAS chips::SN74LS08 and1
 
+
+
+
+
 LINE line1 vcc1 and1.vcc
 LINE line2 vcc1 and1.a0
 LINE line3 vcc1 and1.b0
