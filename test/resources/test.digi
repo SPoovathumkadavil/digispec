@@ -1,0 +1,32 @@
+
+-- A test file
+
+include base
+include resource
+
+%RUNNABLE%
+begin mod bare_test
+
+ALIAS base::power::VCC vcc1
+ALIAS base::power::GND gnd1
+ALIAS chips::SN74LS08 and1
+
+begin set and1.vcc
+vcc1
+end and1.vcc
+
+begin set and1.gnd
+gnd1
+end and1.gnd
+
+begin set and1.a0
+#1
+end and1.a0
+
+begin set and1.b0
+#1
+end and1.b0
+
+display and1.c0
+
+end bare_test
