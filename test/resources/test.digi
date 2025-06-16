@@ -5,28 +5,17 @@ include base
 include resource
 
 %RUNNABLE%
-begin mod bare_test
+begin mod test
 
 ALIAS base::power::VCC vcc1
 ALIAS base::power::GND gnd1
 ALIAS chips::SN74LS08 and1
 
-begin set and1.vcc
-vcc1
-end and1.vcc
-
-begin set and1.gnd
-gnd1
-end and1.gnd
-
-begin set and1.a0
-#1
-end and1.a0
-
-begin set and1.b0
-#1
-end and1.b0
+LINE line1 vcc1 and1.vcc
+LINE line2 vcc1 and1.a0
+LINE line3 vcc1 and1.b0
+LINE line4 gnd1 and1.gnd
 
 display and1.c0
 
-end bare_test
+end test
