@@ -1,5 +1,6 @@
 
 #include "digispec/digitokenizer.hpp"
+#include <iostream>
 
 namespace digispec {
     const std::array<std::string_view, 3> digi_tokenizer::VALID_KEYWORDS = {
@@ -42,7 +43,10 @@ namespace digispec {
                         } else if (is_valid_command(currentToken)) {
                             tokens.emplace_back(token_type::COMMAND, currentToken);
                         } else if (std::all_of(currentToken.begin(), currentToken.end(), is_valid_identifier_char)) {
-                            // check if identifier can be separated using symbols
+                            tokens.emplace_back(token_type::IDENTIFIER, currentToken);
+                        } else if (is_valid_symbol(currentToken)) {
+                            tokens.emplace_back(token_type::SYMBOL, currentToken);
+                        } else {
                             if (currentToken.find("::") != std::string::npos) {
                                 // Split by "::" and create multiple identifier tokens
                                 size_t pos = 0;
@@ -52,12 +56,8 @@ namespace digispec {
                                     currentToken.erase(0, pos + 2);
                                 }
                             } else {
-                                tokens.emplace_back(token_type::IDENTIFIER, currentToken);
+                                tokens.emplace_back(token_type::NONE, currentToken);
                             }
-                        } else if (is_valid_symbol(currentToken)) {
-                            tokens.emplace_back(token_type::SYMBOL, currentToken);
-                        } else {
-                            tokens.emplace_back(token_type::NONE, currentToken);
                         }
                         currentToken.clear();
                     }

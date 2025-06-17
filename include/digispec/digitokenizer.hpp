@@ -6,6 +6,7 @@
 #include <array>
 #include <vector>
 #include <filesystem>
+#include <algorithm>
 
 #include "digispec/digispec_export.hpp"
 
