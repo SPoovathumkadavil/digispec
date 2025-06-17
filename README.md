@@ -54,6 +54,17 @@ end SN74LS08
 
 See the [BUILDING](BUILDING.md) document.
 
+# Roadmap
+
+- ~ Digitokenizer 
+    - ✅ Parse file contents
+    - ~ Tests
+- X Digiparser
+    - X Ensure no errors in token order and content
+- X Diginterpreter
+    - X Loop-based logic interpretation of tokens or something like that
+
+
 # Contributing
 
 See the [CONTRIBUTING](CONTRIBUTING.md) document.

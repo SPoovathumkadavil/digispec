@@ -46,8 +46,7 @@ namespace digispec {
                             tokens.emplace_back(token_type::IDENTIFIER, currentToken);
                         } else if (is_valid_symbol(currentToken)) {
                             tokens.emplace_back(token_type::SYMBOL, currentToken);
-                        } else {
-                            if (currentToken.find("::") != std::string::npos) {
+                        } else if (currentToken.find("::") != std::string::npos) {
                                 // Split by "::" and create multiple identifier tokens
                                 size_t pos = 0;
                                 while ((pos = currentToken.find("::")) != std::string::npos) {
@@ -55,9 +54,8 @@ namespace digispec {
                                     tokens.emplace_back(token_type::SYMBOL, "::");
                                     currentToken.erase(0, pos + 2);
                                 }
-                            } else {
-                                tokens.emplace_back(token_type::NONE, currentToken);
-                            }
+                        } else {
+                            tokens.emplace_back(token_type::NONE, currentToken);
                         }
                         currentToken.clear();
                     }
