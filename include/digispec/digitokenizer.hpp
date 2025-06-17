@@ -66,7 +66,7 @@ namespace digispec {
             return std::isalnum(ch) || ch == '_' || ch == '-' || ch == '.';
         }
         /**
-         * @breif Helper function to determine if a string is a valid command.
+         * @brief Helper function to determine if a string is a valid command.
          * @param command The string to check.
          * @return True if the string is a valid command, false otherwise.
          */
@@ -86,5 +86,13 @@ namespace digispec {
             std::transform(lower_keyword.begin(), lower_keyword.end(), lower_keyword.begin(), ::tolower);
             return std::find(VALID_KEYWORDS.begin(), VALID_KEYWORDS.end(), lower_keyword) != VALID_KEYWORDS.end();
         } 
+        /**
+         * @brief Helper function to check if a string is a valid symbol.
+         * @param symbol The string to check.
+         * @return True if the string is a valid symbol, false otherwise.
+         */
+        static bool is_valid_symbol(const std::string& symbol) {
+            return symbol == "::";
+        }
     };
 }

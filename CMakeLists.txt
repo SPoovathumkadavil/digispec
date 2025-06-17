@@ -5,7 +5,7 @@ include(cmake/prelude.cmake)
 project(
     digispec
     VERSION 0.1.0
-    DESCRIPTION "Short description"
+    DESCRIPTION "Plain Text Specification of a Digital Logic Circuit"
     HOMEPAGE_URL "https://example.com/"
     LANGUAGES CXX
 )

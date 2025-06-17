@@ -16,28 +16,12 @@ namespace digispec {
         int i = 0;
         do
         {
-            if (input.end() == input.begin() + i) {
-                // If we reached the end of the string, we need to check if there's a token to capture
-                if (!currentToken.empty()) {
-                    if (capture_type == token_type::COMMENT) {
-                        tokens.emplace_back(token_type::COMMENT, currentToken);
-                    } else if (is_valid_keyword(currentToken)) {
-                        tokens.emplace_back(token_type::KEYWORD, currentToken);
-                    } else if (is_valid_command(currentToken)) {
-                        tokens.emplace_back(token_type::COMMAND, currentToken);
-                    } else if (std::all_of(currentToken.begin(), currentToken.end(), is_valid_identifier_char)) {
-                        tokens.emplace_back(token_type::IDENTIFIER, currentToken);
-                    } else {
-                        tokens.emplace_back(token_type::SYMBOL, currentToken);
-                    }
-                }
-                break;
-            }
-
-            char ch = input.at(i);
+            char ch = ' ';
+            if (input.end() != input.begin() + i)
+                ch = input.at(i);
 
             // delimiter reached or end of string reached and current token is not empty
-            if (((ch == ' ' || ch == '\t' || ch == '\n'))) {
+            if ((ch == ' ' || ch == '\t' || ch == '\n')) {
                 if (!currentToken.empty()) {
                     if (currentToken == "--") {
                         capture_to = "\n";
@@ -58,9 +42,22 @@ namespace digispec {
                         } else if (is_valid_command(currentToken)) {
                             tokens.emplace_back(token_type::COMMAND, currentToken);
                         } else if (std::all_of(currentToken.begin(), currentToken.end(), is_valid_identifier_char)) {
-                            tokens.emplace_back(token_type::IDENTIFIER, currentToken);
-                        } else {
+                            // check if identifier can be separated using symbols
+                            if (currentToken.find("::") != std::string::npos) {
+                                // Split by "::" and create multiple identifier tokens
+                                size_t pos = 0;
+                                while ((pos = currentToken.find("::")) != std::string::npos) {
+                                    tokens.emplace_back(token_type::IDENTIFIER, currentToken.substr(0, pos));
+                                    tokens.emplace_back(token_type::SYMBOL, "::");
+                                    currentToken.erase(0, pos + 2);
+                                }
+                            } else {
+                                tokens.emplace_back(token_type::IDENTIFIER, currentToken);
+                            }
+                        } else if (is_valid_symbol(currentToken)) {
                             tokens.emplace_back(token_type::SYMBOL, currentToken);
+                        } else {
+                            tokens.emplace_back(token_type::NONE, currentToken);
                         }
                         currentToken.clear();
                     }

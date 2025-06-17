@@ -16,8 +16,8 @@ INPUT vcc gnd a0 b0 a1 b1 a2 b2 a3 b3
 OUTPUT c0 c1 c2 c3
 
 -- type
-TYPE i_vcc base::power::VCC
-TYPE i_gnd base::power::GND
+TYPE i_vcc base : power : VCC
+TYPE i_gnd base : power : GND
 
 -- Requirements
 REQUIRE i_vcc i_gnd
