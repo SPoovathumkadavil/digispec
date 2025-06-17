@@ -22,20 +22,14 @@ namespace digispec {
         SYMBOL,     // Represents a special character or symbol
         NONE        // Represents an unrecognized token
     };
-    class token {
-    public:
-        token(token_type type, const std::string& value)
-            : type(type), value(value) {}
-
-        token_type getType() const { return type; }
-        std::string getValue() const { return value; }
-
-    private:
+    struct token {
         token_type type;
         std::string value;
     };
     class DIGISPEC_EXPORT digi_tokenizer {
     public:
+        digi_tokenizer() = default;
+        ~digi_tokenizer() = default;
         /**
          * @brief Tokenizes the input string based on the specified delimiter.
          * 
