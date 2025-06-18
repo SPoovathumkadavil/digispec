@@ -25,6 +25,9 @@ namespace digispec {
     struct token {
         token_type type;
         std::string value;
+        bool operator==(const token& other) const {
+            return type == other.type && value == other.value;
+        }
     };
     class DIGISPEC_EXPORT digi_tokenizer {
     public:
@@ -50,7 +53,13 @@ namespace digispec {
          * 
          * These commands are recognized and can be used in the input.
          */
-        static const std::array<std::string_view, 9> VALID_COMMANDS;
+        static const std::array<std::string_view, 10> VALID_COMMANDS;
+        /**
+         * @brief Valid symbols in the digitokenizer.
+         * 
+         * These symbols are recognized and can be used in the input.
+         */
+        static const std::array<std::string_view, 2> VALID_SYMBOLS;
         /**
          * @brief Helper function to determine if a character is a valid identifier character.
          * 
@@ -58,7 +67,7 @@ namespace digispec {
          * @return True if the character is valid, false otherwise.
          */
         static bool is_valid_identifier_char(char ch) {
-            return std::isalnum(ch) || ch == '_' || ch == '-' || ch == '.';
+            return std::isalnum(ch) || ch == '_' || ch == '-' || ch == '.' || ch == ':';
         }
         /**
          * @brief Helper function to determine if a string is a valid command.
@@ -87,7 +96,10 @@ namespace digispec {
          * @return True if the string is a valid symbol, false otherwise.
          */
         static bool is_valid_symbol(const std::string& symbol) {
-            return symbol == "::";
+            return 
+                !symbol.empty() && symbol[0] == '%' &&
+                symbol.size() > 1 && symbol[symbol.size() - 1] == '%' &&
+                std::find(VALID_SYMBOLS.begin(), VALID_SYMBOLS.end(), symbol.substr(1, symbol.size() - 1)) != VALID_SYMBOLS.end();
         }
     };
 }

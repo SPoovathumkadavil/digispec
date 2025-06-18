@@ -6,8 +6,11 @@ namespace digispec {
     const std::array<std::string_view, 3> digi_tokenizer::VALID_KEYWORDS = {
         "mod", "definition", "set"
     };
-    const std::array<std::string_view, 9> digi_tokenizer::VALID_COMMANDS = {
-        "begin", "end", "display", "input", "output", "alias", "line", "compare", "include"
+    const std::array<std::string_view, 10> digi_tokenizer::VALID_COMMANDS = {
+        "begin", "end", "display", "input", "output", "alias", "line", "compare", "include", "return"
+    };
+    const std::array<std::string_view, 2> digi_tokenizer::VALID_SYMBOLS = {
+        "runnable", "library"
     };
     std::vector<token> digi_tokenizer::tokenize(const std::string& input) {
         std::vector<token> tokens;
@@ -30,7 +33,7 @@ namespace digispec {
                     }
                     if (capture_type == token_type::COMMENT) {
                         if (ch == '\n') {
-                            tokens.emplace_back(token_type::COMMENT, currentToken);
+                            tokens.push_back({token_type::COMMENT, currentToken});
                             currentToken.clear();
                             capture_type = token_type::NONE;
                         } else {
@@ -39,23 +42,15 @@ namespace digispec {
                     } else if (capture_type == token_type::NONE) {
                         // Check if the current token is valid keyword or command
                         if (is_valid_keyword(currentToken)) {
-                            tokens.emplace_back(token_type::KEYWORD, currentToken);
+                            tokens.push_back({token_type::KEYWORD, currentToken});
                         } else if (is_valid_command(currentToken)) {
-                            tokens.emplace_back(token_type::COMMAND, currentToken);
+                            tokens.push_back({token_type::COMMAND, currentToken});
                         } else if (std::all_of(currentToken.begin(), currentToken.end(), is_valid_identifier_char)) {
-                            tokens.emplace_back(token_type::IDENTIFIER, currentToken);
+                            tokens.push_back({token_type::IDENTIFIER, currentToken});
                         } else if (is_valid_symbol(currentToken)) {
-                            tokens.emplace_back(token_type::SYMBOL, currentToken);
-                        } else if (currentToken.find("::") != std::string::npos) {
-                                // Split by "::" and create multiple identifier tokens
-                                size_t pos = 0;
-                                while ((pos = currentToken.find("::")) != std::string::npos) {
-                                    tokens.emplace_back(token_type::IDENTIFIER, currentToken.substr(0, pos));
-                                    tokens.emplace_back(token_type::SYMBOL, "::");
-                                    currentToken.erase(0, pos + 2);
-                                }
+                            tokens.push_back({token_type::SYMBOL, currentToken});
                         } else {
-                            tokens.emplace_back(token_type::NONE, currentToken);
+                            tokens.push_back({token_type::NONE, currentToken});
                         }
                         currentToken.clear();
                     }

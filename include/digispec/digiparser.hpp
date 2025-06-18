@@ -8,6 +8,7 @@
 
 #include "digispec/digitokenizer.hpp"
 #include "digispec/digispec_export.hpp"
+#include "digispec/util.hpp"
 
 namespace digispec {
     enum class DIGISPEC_EXPORT argument_type {
@@ -38,10 +39,16 @@ namespace digispec {
         ~digiparser() = default;
 
         // Parses the tokens and ensures valid order and content
-        bool parse(const std::vector<token>& tokens);
+        // exits on first error
+        validation parse(const std::vector<token>& tokens);
+    private:
+        // Helper function to validate whether blocks are properly nested
+        validation validate_nesting(const std::vector<token>& tokens);
+        // Helper function to validate a single command against the registered commands
+        validation validate_command(const command& cmd, const std::vector<token>& tokens, size_t& index, std::vector<token>& identities) const;
     };
     // all registered commands
-    static const std::array<command, 9> registered_commands = {{
+    static const std::array<command, 10> registered_commands = {{
         {"begin", {
             {{"type", argument_type::KEYWORD, {argument_options::REQUIRED}, ""},
              {"name", argument_type::IDENTIFIER, {argument_options::REQUIRED}, ""}}
@@ -72,6 +79,7 @@ namespace digispec {
         }},
         {"include", {
             {{"module", argument_type::IDENTIFIER, {argument_options::REQUIRED}, ""}}
-        }}
+        }},
+        {"return", {}}
     }};
-}
+} // namespace digispec
