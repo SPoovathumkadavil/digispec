@@ -9,12 +9,12 @@
 
 TEST(LibTests, FileExistsTest)
 {
-  ASSERT_TRUE(std::filesystem::exists("resources/test.digi"));
+  ASSERT_TRUE(std::filesystem::exists("resources/resource.digi"));
 }
 
 TEST(LibTests, TokenizeTest)
 {
-  std::ifstream file("resources/test.digi");
+  std::ifstream file("resources/resource.digi");
   ASSERT_TRUE(file.is_open());
 
   std::stringstream buffer;
@@ -25,14 +25,15 @@ TEST(LibTests, TokenizeTest)
   ASSERT_FALSE(tokens.empty());
 
   // dump tokens to console
-  for (const auto& token : tokens) {
-      std::cout << "Token: " << token.value << ", Type: " << static_cast<int>(token.type) << std::endl;
+  for (int i = 0; i < tokens.size(); ++i) {
+      const auto& token = tokens[i];
+      std::cout << "Token " << i << ": " << token.value << ", Type: " << static_cast<int>(token.type) << std::endl;
   }
 }
 
 TEST(LibTests, ParseTest)
 {
-  std::ifstream file("resources/test.digi");
+  std::ifstream file("resources/resource.digi");
   ASSERT_TRUE(file.is_open());
 
   std::stringstream buffer;

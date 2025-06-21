@@ -1,4 +1,8 @@
 
+%LIBRARY%
+begin mod base
+end base
+
 -- Chips and Other Resources
 
 include base
