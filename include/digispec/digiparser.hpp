@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <array>
+#include <algorithm>
 
 #include "digispec/digitokenizer.hpp"
 #include "digispec/digispec_export.hpp"
