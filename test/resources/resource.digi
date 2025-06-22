@@ -20,27 +20,27 @@ INPUT vcc gnd a0 b0 a1 b1 a2 b2 a3 b3
 OUTPUT c0 c1 c2 c3
 
 -- Requirements
-REQUIRE i_vcc i_gnd
+REQUIRE vcc gnd
 
-begin set o_c0
-compare i_a0 i_b0
+begin set c0
+compare a0 b0
 return
-end o_c0
+end c0
 
-begin set o_c1
-compare i_a1 i_b1
+begin set c1
+compare a1 b1
 return
-end o_c1
+end c1
 
-begin set o_c2
-compare i_a2 i_b2
+begin set c2
+compare a2 b2
 return
-end o_c2
+end c2
 
-begin set o_c3
-compare i_a3 i_b3
+begin set c3
+compare a3 b3
 return
-end o_c3
+end c3
 
 end SN74LS08
 

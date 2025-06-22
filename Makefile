@@ -40,7 +40,7 @@ dev:
 	cmake --build --preset=dev
 
 .PHONY: test
-test:
+test: dev
 	echo "running test"
 	cd $(BUILD_DEV_DIR)/test && ./$(LIB)_test
 

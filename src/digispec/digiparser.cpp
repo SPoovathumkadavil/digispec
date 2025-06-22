@@ -108,15 +108,9 @@ namespace digispec {
             }
             token current_token = tokens.at(index);
             if (current_token.type == token_type::IDENTIFIER && (arg.type == argument_type::IDENTIFIER || arg.type == argument_type::VALUE)) {
-                bool is_captured = false;
-                for (const auto& captured : *captured_identities) {
-                    if (captured.value == current_token.value) {
-                        is_captured = true;
-                        break;
-                    }
-                }
                 bool is_capturing = false;
                 bool is_declarative = false;
+                bool is_multiple = false;
                 for (const auto& option : arg.configs.value_or(std::vector<argument_options>{})) {
                     if (option == argument_options::CAPTURING) {
                         is_capturing = true;
@@ -124,13 +118,43 @@ namespace digispec {
                     if (option == argument_options::DECLARATIVE) {
                         is_declarative = true;
                     }
+                    if (option == argument_options::MULTIPLE) {
+                        is_multiple = true;
+                    }
+                }
+                
+                bool is_captured = false;
+                for (const auto& captured : *captured_identities) {
+                    if (captured.value == current_token.value) {
+                        is_captured = true;
+                        break;
+                    }
                 }
                 if (is_capturing) {
-                    if (!is_captured) {
-                        // If the identifier is not declared, we can capture it
-                        captured_identities->push_back(current_token);
+                    if (is_multiple) {
+                        while (index < tokens.size() && tokens[index].type == token_type::IDENTIFIER) {
+                            is_captured = false;
+                            for (const auto& captured : *captured_identities) {
+                                if (captured.value == tokens[index].value) {
+                                    is_captured = true;
+                                    break;
+                                }
+                            }
+                            if (!is_captured) {
+                                captured_identities->push_back(tokens[index]);
+                            } else {
+                                return {false, "Identifier '" + tokens[index].value + "' used in command '" + cmd.name + "' on token index " + std::to_string(index) + " is already captured."};
+                            }
+                            index++;
+                        }
+                        index--; // Adjust index to point to the last identifier processed
                     } else {
-                        return {false, "Identifier '" + current_token.value + "' used in command '" + cmd.name + "' on token index " + std::to_string(index) + " is already captured."};
+                        if (!is_captured) {
+                            // If the identifier is not declared, we can capture it
+                            captured_identities->push_back(current_token);
+                        } else {
+                            return {false, "Identifier '" + current_token.value + "' used in command '" + cmd.name + "' on token index " + std::to_string(index) + " is already captured."};
+                        }
                     }
                 } else if (!is_captured && !is_declarative) {
                     return {false, "Identifier '" + current_token.value + "' used in command '" + cmd.name + "' on token index " + std::to_string(index) + " is not declared."};

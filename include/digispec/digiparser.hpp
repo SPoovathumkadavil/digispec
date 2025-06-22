@@ -51,7 +51,7 @@ namespace digispec {
         validation validate_command(const command& cmd, const std::vector<token>& tokens, size_t index, std::vector<token> *identities) const;
     };
     // all registered commands
-    static const std::array<command, 11> registered_commands = {{
+    static const std::vector<command> registered_commands = {{
         {"begin", {
             {"type", argument_type::KEYWORD, std::make_optional(std::vector<argument_options>{argument_options::REQUIRED}), std::make_optional(std::vector<std::string>{"mod", "definition"})},
             {"name", argument_type::IDENTIFIER, std::make_optional(std::vector<argument_options>{argument_options::REQUIRED, argument_options::DECLARATIVE, argument_options::CAPTURING})}
@@ -63,7 +63,7 @@ namespace digispec {
             {"value", argument_type::VALUE, std::make_optional(std::vector<argument_options>{argument_options::REQUIRED})}
         }},
         {"input", {
-            {"variable", argument_type::IDENTIFIER, std::make_optional(std::vector<argument_options>{argument_options::REQUIRED, argument_options::MULTIPLE, argument_options::DECLARATIVE})}
+            {"variable", argument_type::IDENTIFIER, std::make_optional(std::vector<argument_options>{argument_options::REQUIRED, argument_options::MULTIPLE, argument_options::DECLARATIVE, argument_options::CAPTURING})}
         }},
         {"output", {
             {"value", argument_type::VALUE, std::make_optional(std::vector<argument_options>{argument_options::REQUIRED, argument_options::MULTIPLE, argument_options::DECLARATIVE})}
