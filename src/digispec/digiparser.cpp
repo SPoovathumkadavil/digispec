@@ -1,5 +1,6 @@
 
 #include "digispec/digiparser.hpp"
+#include <numeric>
 
 namespace digispec {
 
@@ -12,31 +13,32 @@ namespace digispec {
         }
 
         // validate each command against the registered commands
-        // std::vector<token> declared_identities; // Store identifiers for later validation
-        // for (size_t i = 0; i < tokens.size(); ++i) {
-        //     const token& current_token = tokens[i];
-        //     if (current_token.type == token_type::COMMAND) {
-        //         // Find the command in the registered commands
-        //         std::string command_name = current_token.value;
-        //         auto it = std::find_if(registered_commands.begin(), registered_commands.end(),
-        //                                [&command_name](const command& cmd) { return cmd.name == command_name; });
-        //         // Validate the command
-        //         validation cmd_validation = validate_command(*it, tokens, &i, &declared_identities);
-        //         if (!cmd_validation.valid) {
-        //             // print out the declared_identities registered so far
-        //             std::string identities_str;
-        //             for (const auto& id : declared_identities) {
-        //                 identities_str += id.value + " ";
-        //             }
-        //             return cmd_validation;
-        //         }
-        //     } else if (current_token.type == token_type::IDENTIFIER) {
-        //         // Register the identifier
-        //         declared_identities.push_back(current_token);
-        //     } else if (current_token.type == token_type::SYMBOL) {
-        //         // validate that symbol is assigned to a module
-        //     }
-        // }
+        std::vector<token> captured_identities; // store identifiers for later validation
+        for (size_t i = 0; i < tokens.size(); i++) {
+            const token& current_token = tokens[i];
+            if (current_token.type == token_type::COMMAND) {
+                // find the command in the registered commands
+                auto it = std::find_if(registered_commands.begin(), registered_commands.end(),
+                                       [&current_token](const command& cmd) {
+                    std::string lower_cmd = current_token.value;
+                    std::transform(lower_cmd.begin(), lower_cmd.end(), lower_cmd.begin(), ::tolower);
+                    return lower_cmd == cmd.name;
+                });
+                if (it == registered_commands.end()) {
+                    return {false, "Unknown command '" + current_token.value + "' at token index " + std::to_string(i)};
+                }
+                // validate the command
+                validation cmd_validation = validate_command(*it, tokens, i, &captured_identities);
+                if (!cmd_validation.valid) {
+                    return cmd_validation;
+                }
+                // skip till next command
+                while (i+1 < tokens.size() && tokens[i+1].type != token_type::COMMAND) {
+                    i++;
+                }
+            } else if (current_token.type == token_type::IDENTIFIER) {
+            } else if (current_token.type == token_type::SYMBOL) {}
+        }
 
         // If we reach here, all commands are valid and properly nested
         return {true, ""};
@@ -96,28 +98,46 @@ namespace digispec {
         return {true, ""};
 
     }
-    validation digiparser::validate_command(const command& cmd, const std::vector<token>& tokens, size_t *index, std::vector<token> *declared_identities) const {
-        // the start index is the command itself
-        // so we start at index + 1, verifying the arguments
-        (*index)++; // Move past the command token
+    validation digiparser::validate_command(const command& cmd, const std::vector<token>& tokens, size_t index, std::vector<token> *captured_identities) const {
+        // the start index is the command itself, so we start at index + 1, verifying the arguments
+        index++; // Move past the command token
         
         for (const auto& arg : cmd.arguments) {
-            if (*index >= tokens.size()) {
+            if (index >= tokens.size()) {
                 return {false, "Missing argument '" + arg.name + "' for command '" + cmd.name + "'"};
             }
-            const token& current_token = tokens[*index];
+            token current_token = tokens.at(index);
             if (current_token.type == token_type::IDENTIFIER && (arg.type == argument_type::IDENTIFIER || arg.type == argument_type::VALUE)) {
-                // Check if the identifier is declared
-                if (std::find_if(declared_identities->begin(), declared_identities->end(),
-                                 [&current_token](const token& id) { return id.value == current_token.value; }) == declared_identities->end()
-                    && arg.configs && std::find(arg.configs->begin(), arg.configs->end(), argument_options::DECLARATIVE) == arg.configs->end()) {
-                    return {false, "Undeclared identifier '" + current_token.value + "' for command '" + cmd.name + "'"};
+                bool is_captured = false;
+                for (const auto& captured : *captured_identities) {
+                    if (captured.value == current_token.value) {
+                        is_captured = true;
+                        break;
+                    }
                 }
-            } else if (current_token.type == token_type::KEYWORD && arg.type == argument_type::KEYWORD) {
-
-            }
-            // Move to the next token
-            (*index)++;
+                bool is_capturing = false;
+                bool is_declarative = false;
+                for (const auto& option : arg.configs.value_or(std::vector<argument_options>{})) {
+                    if (option == argument_options::CAPTURING) {
+                        is_capturing = true;
+                    }
+                    if (option == argument_options::DECLARATIVE) {
+                        is_declarative = true;
+                    }
+                }
+                if (is_capturing) {
+                    if (!is_captured) {
+                        // If the identifier is not declared, we can capture it
+                        captured_identities->push_back(current_token);
+                    } else {
+                        return {false, "Identifier '" + current_token.value + "' used in command '" + cmd.name + "' on token index " + std::to_string(index) + " is already captured."};
+                    }
+                } else if (!is_captured && !is_declarative) {
+                    return {false, "Identifier '" + current_token.value + "' used in command '" + cmd.name + "' on token index " + std::to_string(index) + " is not declared."};
+                }
+            } else if (current_token.type == token_type::KEYWORD && arg.type == argument_type::KEYWORD) {}
+            
+            index++;
         }
             
         return {true, ""};
