@@ -13,6 +13,7 @@ namespace digispec {
         }
 
         // validate each command against the registered commands
+        std::vector<token> declared_identities; // store identifiers for later validation
         std::vector<token> captured_identities; // store identifiers for later validation
         for (size_t i = 0; i < tokens.size(); i++) {
             const token& current_token = tokens[i];
@@ -28,7 +29,7 @@ namespace digispec {
                     return {false, "Unknown command '" + current_token.value + "' at token index " + std::to_string(i)};
                 }
                 // validate the command
-                validation cmd_validation = validate_command(*it, tokens, i, &captured_identities);
+                validation cmd_validation = validate_command(*it, tokens, i, &declared_identities, &captured_identities);
                 if (!cmd_validation.valid) {
                     return cmd_validation;
                 }
@@ -38,6 +39,14 @@ namespace digispec {
                 }
             } else if (current_token.type == token_type::IDENTIFIER) {
             } else if (current_token.type == token_type::SYMBOL) {}
+        }
+
+        if (!declared_identities.empty()) {
+            // If there are any declared identities, they should be captured
+            return {false, "Uncaptured identifiers found: " + std::accumulate(declared_identities.begin(), declared_identities.end(), std::string(),
+                [](const std::string& acc, const token& t) {
+                    return acc + (acc.empty() ? "" : ", ") + t.value;
+                })};
         }
 
         // If we reach here, all commands are valid and properly nested
@@ -98,7 +107,7 @@ namespace digispec {
         return {true, ""};
 
     }
-    validation digiparser::validate_command(const command& cmd, const std::vector<token>& tokens, size_t index, std::vector<token> *captured_identities) const {
+    validation digiparser::validate_command(const command& cmd, const std::vector<token>& tokens, size_t index, std::vector<token> *declared_identities, std::vector<token> *captured_identities) const {
         // the start index is the command itself, so we start at index + 1, verifying the arguments
         index++; // Move past the command token
         
@@ -141,6 +150,13 @@ namespace digispec {
                                 }
                             }
                             if (!is_captured) {
+                                // remove it from declared_identities if it exists
+                                for (auto it = declared_identities->begin(); it != declared_identities->end(); it++) {
+                                    if (it->value == tokens[index].value) {
+                                        it = declared_identities->erase(it);
+                                        break;
+                                    }
+                                }
                                 captured_identities->push_back(tokens[index]);
                             } else {
                                 return {false, "Identifier '" + tokens[index].value + "' used in command '" + cmd.name + "' on token index " + std::to_string(index) + " is already captured."};
@@ -150,7 +166,13 @@ namespace digispec {
                         index--; // Adjust index to point to the last identifier processed
                     } else {
                         if (!is_captured) {
-                            // If the identifier is not declared, we can capture it
+                            // remove it from declared_identities if it exists
+                            for (auto it = declared_identities->begin(); it != declared_identities->end(); it++) {
+                                if (it->value == current_token.value) {
+                                    it = declared_identities->erase(it);
+                                    break;
+                                }
+                            }
                             captured_identities->push_back(current_token);
                         } else {
                             return {false, "Identifier '" + current_token.value + "' used in command '" + cmd.name + "' on token index " + std::to_string(index) + " is already captured."};
@@ -158,11 +180,20 @@ namespace digispec {
                     }
                 } else if (!is_captured && !is_declarative) {
                     return {false, "Identifier '" + current_token.value + "' used in command '" + cmd.name + "' on token index " + std::to_string(index) + " is not declared."};
+                } else if (!is_captured && is_declarative) {
+                    // If it's declarative, we just add it to declared_identities
+                    declared_identities->push_back(current_token);
+                    DIGISPEC_EXPORT
                 }
             } else if (current_token.type == token_type::KEYWORD && arg.type == argument_type::KEYWORD) {}
             
             index++;
         }
+
+        return {false, "Captured identifiers found: " + std::accumulate(captured_identities->begin(), captured_identities->end(), std::string(),
+            [](const std::string& acc, const token& t) {
+                return acc + (acc.empty() ? "" : ", ") + t.value;
+            })};
             
         return {true, ""};
     }

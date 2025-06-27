@@ -48,13 +48,13 @@ namespace digispec {
         // Helper function to validate whether blocks are properly nested
         validation validate_nesting(const std::vector<token>& tokens);
         // Helper function to validate a single command against the registered commands
-        validation validate_command(const command& cmd, const std::vector<token>& tokens, size_t index, std::vector<token> *identities) const;
+        validation validate_command(const command& cmd, const std::vector<token>& tokens, size_t index, std::vector<token> *declared_identities, std::vector<token> *captured_identities) const;
     };
     // all registered commands
     static const std::vector<command> registered_commands = {{
         {"begin", {
             {"type", argument_type::KEYWORD, std::make_optional(std::vector<argument_options>{argument_options::REQUIRED}), std::make_optional(std::vector<std::string>{"mod", "definition"})},
-            {"name", argument_type::IDENTIFIER, std::make_optional(std::vector<argument_options>{argument_options::REQUIRED, argument_options::DECLARATIVE, argument_options::CAPTURING})}
+            {"name", argument_type::IDENTIFIER, std::make_optional(std::vector<argument_options>{argument_options::REQUIRED, argument_options::CAPTURING})}
         }},
         {"end", {
             {"name", argument_type::IDENTIFIER, std::make_optional(std::vector<argument_options>{argument_options::REQUIRED})}
@@ -63,7 +63,7 @@ namespace digispec {
             {"value", argument_type::VALUE, std::make_optional(std::vector<argument_options>{argument_options::REQUIRED})}
         }},
         {"input", {
-            {"variable", argument_type::IDENTIFIER, std::make_optional(std::vector<argument_options>{argument_options::REQUIRED, argument_options::MULTIPLE, argument_options::DECLARATIVE, argument_options::CAPTURING})}
+            {"variable", argument_type::IDENTIFIER, std::make_optional(std::vector<argument_options>{argument_options::REQUIRED, argument_options::MULTIPLE, argument_options::CAPTURING})}
         }},
         {"output", {
             {"value", argument_type::VALUE, std::make_optional(std::vector<argument_options>{argument_options::REQUIRED, argument_options::MULTIPLE, argument_options::DECLARATIVE})}

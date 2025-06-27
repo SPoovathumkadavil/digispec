@@ -17,7 +17,7 @@ export SN74LS08
 begin definition SN74LS08
 
 INPUT vcc gnd a0 b0 a1 b1 a2 b2 a3 b3
-OUTPUT c0 c1 c2 c3
+OUTPUT c0 c1 c2 c3 c4
 
 -- Requirements
 REQUIRE vcc gnd
